@@ -1,0 +1,17 @@
+# Build artifacts
+dist/
+build/
+*.spec
+__pycache__/
+*.pyc
+
+# DLLs
+libcairo-2.dll
+
+# Temp test files
+test_preview.py
+test_quick.py
+
+# OS files
+Thumbs.db
+.DS_Store
