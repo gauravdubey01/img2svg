@@ -232,6 +232,13 @@ def save_temp_svgs(image_path, **kwargs):
     return results
 
 
+def count_paths(image_path, mode="outline", **kwargs):
+    """Count SVG paths without writing a file."""
+    img = Image.open(image_path)
+    svg = _get_svg_data(mode, img, **kwargs)
+    return svg.count('d="M ')
+
+
 def save_svg(image_path, output_path, mode="outline", **kwargs):
     """Save single SVG file. Returns path count."""
     img = Image.open(image_path)
