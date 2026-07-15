@@ -32,7 +32,7 @@ Copy-Item (Join-Path $ScriptDir "AppxManifest.xml") $PayloadDir\
 
 # 3. Update version in manifest
 $Manifest = Join-Path $PayloadDir "AppxManifest.xml"
-(Get-Content $Manifest) -replace 'Version="[^"]+"', "Version=`"$Version`"" | Set-Content $Manifest
+(Get-Content $Manifest) -replace '\sVersion="[^"]+"', " Version=`"$Version`"" | Set-Content $Manifest -Encoding UTF8
 
 # 4. Create self-signed cert if not exists
 if (-not (Test-Path $CertPath)) {
