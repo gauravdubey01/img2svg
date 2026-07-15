@@ -6,7 +6,7 @@
             Publisher="CN=0A36019C-61EA-47F2-A9AE-D3B27D5E13D4"
             Version="1.0.0.0" />
   <Properties>
-    <DisplayName>Image to SVG Converter</DisplayName>
+    <DisplayName>image to svg</DisplayName>
     <PublisherDisplayName>Gaurav_dubey</PublisherDisplayName>
     <Description>Convert PNG, JPG, BMP, WEBP and TIFF images to scalable vector (SVG) files with live preview. Supports Outline, Silhouette, and Color modes with adjustable settings.</Description>
     <Logo>Assets\Square150x150Logo.png</Logo>
@@ -23,7 +23,7 @@
   </Capabilities>
   <Applications>
     <Application Id="ImageToSVG" Executable="ImageToSVG.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="Image to SVG Converter"
+      <uap:VisualElements DisplayName="image to svg"
         Description="Convert images to SVG vector files."
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
