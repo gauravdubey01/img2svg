@@ -8,6 +8,14 @@ __pycache__/
 # DLLs
 libcairo-2.dll
 
+# Generated icon
+icon.ico
+
+# MSIX build artifacts
+msix/payload/
+msix/Assets/
+msix/temp_cert.*
+
 # Temp test files
 test_preview.py
 test_quick.py
