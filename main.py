@@ -4,6 +4,7 @@ import ttkbootstrap as tb
 import threading
 import webbrowser
 import os
+import sys
 from PIL import Image, ImageTk
 from converter import render_preview_bitmap, save_svg, count_paths, TEMP_DIR
 
@@ -29,6 +30,14 @@ FONT = ("Segoe UI", 10)
 FBOLD = ("Segoe UI", 10, "bold")
 FTITLE = ("Segoe UI", 14, "bold")
 FSMALL = ("Segoe UI", 9)
+
+
+def _resource_path(rel):
+    try:
+        base = sys._MEIPASS
+    except AttributeError:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, rel)
 
 
 def rr(c, x1, y1, x2, y2, r, **kw):
@@ -142,15 +151,13 @@ class ToolTip:
     def _show(self):
         x = self.widget.winfo_rootx() + 10
         y = self.widget.winfo_rooty() + self.widget.winfo_height() + 4
-        self._tw = tk.Toplevel(self.widget, bg=CARD)
+        self._tw = tk.Toplevel(self.widget, bg=INP)
         self._tw.wm_overrideredirect(True)
-        self._tw.wm_geometry(f"+{x}+{y}")
-        c = tk.Canvas(self._tw, highlightthickness=0, bd=0, bg=CARD)
-        c.pack()
-        tw = len(self.text) * 7 + 24
-        th = 28
-        rr(c, 0, 0, tw, th, 8, fill=INP, outline=BORDER, width=1)
-        c.create_text(tw // 2, th // 2, text=self.text, fill=FG, font=FSMALL, anchor="center")
+        lbl = tk.Label(self._tw, text=self.text, font=FSMALL, fg=FG, bg=INP,
+                       padx=12, pady=6)
+        lbl.pack()
+        self._tw.update_idletasks()
+        self._tw.geometry(f"{lbl.winfo_reqwidth()}x{lbl.winfo_reqheight()}+{x}+{y}")
 
     def _hide(self, e=None):
         if self._id:
@@ -261,6 +268,9 @@ class App:
         root.geometry("1200x720")
         root.minsize(1000, 620)
         root.configure(bg=BG)
+        icon_file = _resource_path("icon.png")
+        if os.path.exists(icon_file):
+            root.iconphoto(True, tk.PhotoImage(file=icon_file))
 
         self.input_path = tk.StringVar()
         self.mode = tk.StringVar(value="outline")
@@ -334,12 +344,18 @@ class App:
             row.pack(fill=tk.X, pady=(pady, 6))
             tk.Label(row, text=text, font=FBOLD, bg=CARD, fg=PRIMARY, anchor="w").pack(side=tk.LEFT)
 
-        def frow(var, cb):
+        def frow(var, cb, clear_cb=None):
             row = tk.Frame(inner, bg=CARD)
             row.pack(fill=tk.X, pady=(0, 4))
             pe = PillEntry(row, textvariable=var)
             pe.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
             ToolTip(pe, "Drop an image or type the path")
+            if clear_cb:
+                xb = tk.Label(row, text="\u2715", font=("Segoe UI", 14, "bold"),
+                              fg="#DC2626", bg=CARD, cursor="hand2")
+                xb.pack(side=tk.RIGHT, padx=(0, 8))
+                xb.bind("<Button-1>", lambda e: clear_cb())
+                ToolTip(xb, "Clear selected image")
             pb = PillButton(row, text="Browse", cmd=cb, bootstyle="primary", w=90, h=36)
             pb.pack(side=tk.RIGHT)
             ToolTip(pb, "Select an image file (PNG, JPG, BMP, WEBP, TIFF)")
@@ -359,7 +375,7 @@ class App:
             return row
 
         sec("Input Image", 0)
-        self._input_row = frow(self.input_path, self._browse)
+        self._input_row = frow(self.input_path, self._browse, self._clear_input)
 
         tk.Frame(inner, bg=BORDER, height=1).pack(fill=tk.X, pady=6)
 
@@ -454,6 +470,12 @@ class App:
         d.resizable(False, False)
         d.transient(self.root)
         d.grab_set()
+        d.update_idletasks()
+        pw = self.root.winfo_width()
+        ph = self.root.winfo_height()
+        px = self.root.winfo_x()
+        py = self.root.winfo_y()
+        d.geometry(f"380x200+{px + (pw - 380) // 2}+{py + (ph - 200) // 2}")
 
         inner = tk.Frame(d, bg=CARD, padx=20, pady=20)
         inner.pack(fill=tk.BOTH, expand=True)
@@ -534,6 +556,20 @@ class App:
             self.pl.config(text=os.path.basename(path))
         except Exception:
             pass
+
+    def _clear_input(self):
+        self.input_path.set("")
+        self._itk = None
+        self._ptk = None
+        w = self.ic.winfo_width() or 500
+        h = self.ic.winfo_height() or 180
+        self._draw_preview_bg(self.ic, w, h, INP)
+        pw = self.pc.winfo_width() or 400
+        ph = self.pc.winfo_height() or 300
+        self._draw_preview_bg(self.pc, pw, ph, "#ffffff")
+        self.pl.config(text="")
+        self.il.config(text="")
+        self.status.set("Ready")
 
     def _schedule(self):
         if self._pending:
